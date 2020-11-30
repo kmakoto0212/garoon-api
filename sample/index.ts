@@ -3,8 +3,8 @@ import { login } from "../src/garoon";
 
 (async () => {
   const auth = {
-    username: process.env.USERNAME,
-    password: process.env.PASSWORD,
+    username: process.env.GAROON_USERNAME,
+    password: process.env.GAROON_PASSWORD,
   };
   const loginPage = process.env.LOGIN_PAGE;
   const browser = await createBrowser();
@@ -19,4 +19,12 @@ import { login } from "../src/garoon";
   await page.screenshot({ path: "screenshot.png" });
 
   browser.close();
-})();
+})()
+  .then(() => {
+    console.log("ok");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
