@@ -1,8 +1,8 @@
 import { createBrowser } from "./lib/Browser";
+import { getNodeToString, getNodesToStringsArray } from "./lib/Page";
 import { login } from "./garoon";
 import { auth } from "./types/auth";
 import { user } from "./types/user";
-import { ElementHandle } from "puppeteer";
 
 const selector = {
   about:
@@ -31,19 +31,12 @@ const selector = {
     hireDate:
       "#js-settings-content > div.b-settings-profile-general > div > div.b-form-form.b-form-edittoggleform.is-readonly > dl:nth-child(7) > dd > div > span",
     employeeID:
-      "#js-settings-content > div.b-settings-profile-general > div > div.b-form-form.b-form-edittoggleform.is-readonly > dl:nth-child(8) > dd > div > span",
+      "#js-settings-content > div.b-settings-profile-general > div > div.b-form-form.b-form-edittoggleform.is-readonly > dl:nth-child(8) > dd > div > div > span",
     timeZone:
       "#js-settings-content > div.b-settings-profile-general > div > div.b-form-form.b-form-edittoggleform.is-readonly > dl:nth-child(9) > dd > div > span",
     language:
       "#js-settings-content > div.b-settings-profile-general > div > div.b-form-form.b-form-edittoggleform.is-readonly > dl:nth-child(10) > dd > div > span",
   },
-};
-
-const nodeToString = async (node: ElementHandle<Element> | null) => {
-  if (node == null) return null;
-  return await node.evaluate((e) => {
-    return e.textContent;
-  });
 };
 
 export const getProfile = async (option: {
@@ -56,68 +49,50 @@ export const getProfile = async (option: {
     waitUntil: "networkidle2",
   });
   await login(page, option.auth);
-  const profileNodes: user<ElementHandle> = {
-    about: await page.$(selector.about),
+  const profile: user<string> = {
+    about: await getNodeToString(page, selector.about),
     basicProfile: {
-      displayName: await page.$(selector.basicProfile.displayName),
+      displayName: await getNodeToString(
+        page,
+        selector.basicProfile.displayName
+      ),
       name: {
-        surName: await page.$(selector.basicProfile.name.surName),
-        givenName: await page.$(selector.basicProfile.name.givenName),
+        surName: await getNodeToString(
+          page,
+          selector.basicProfile.name.surName
+        ),
+        givenName: await getNodeToString(
+          page,
+          selector.basicProfile.name.givenName
+        ),
       },
       yomigana: {
-        surNameReading: await page.$(
+        surNameReading: await getNodeToString(
+          page,
           selector.basicProfile.yomigana.surNameReading
         ),
-        givenNameReading: await page.$(
+        givenNameReading: await getNodeToString(
+          page,
           selector.basicProfile.yomigana.givenNameReading
         ),
       },
-      departments: await Promise.all(
-        (await page.$$(selector.basicProfile.departments)).map(
-          async (e) => await e.$("span")
-        )
+      departments: await getNodesToStringsArray(
+        page,
+        selector.basicProfile.departments
       ),
-      priorityDepartment: await page.$(
+      priorityDepartment: await getNodeToString(
+        page,
         selector.basicProfile.priorityDepartment
       ),
-      birthday: await page.$(selector.basicProfile.birthday),
-      hireDate: await page.$(selector.basicProfile.hireDate),
-      employeeID: await page.$(selector.basicProfile.employeeID),
-      timeZone: await page.$(selector.basicProfile.timeZone),
-      language: await page.$(selector.basicProfile.language),
-    },
-  };
-  const profileStringObject: user<string> = {
-    about: await nodeToString(profileNodes.about),
-    basicProfile: {
-      displayName: await nodeToString(profileNodes.basicProfile.displayName),
-      name: {
-        surName: await nodeToString(profileNodes.basicProfile.name.surName),
-        givenName: await nodeToString(profileNodes.basicProfile.name.givenName),
-      },
-      yomigana: {
-        surNameReading: await nodeToString(
-          profileNodes.basicProfile.yomigana.surNameReading
-        ),
-        givenNameReading: await nodeToString(
-          profileNodes.basicProfile.yomigana.givenNameReading
-        ),
-      },
-      departments: await Promise.all(
-        profileNodes.basicProfile.departments.map((e) => nodeToString(e))
-      ),
-      priorityDepartment: await nodeToString(
-        profileNodes.basicProfile.priorityDepartment
-      ),
-      birthday: await nodeToString(profileNodes.basicProfile.birthday),
-      hireDate: await nodeToString(profileNodes.basicProfile.hireDate),
-      employeeID: await nodeToString(profileNodes.basicProfile.employeeID),
-      timeZone: await nodeToString(profileNodes.basicProfile.timeZone),
-      language: await nodeToString(profileNodes.basicProfile.language),
+      birthday: await getNodeToString(page, selector.basicProfile.birthday),
+      hireDate: await getNodeToString(page, selector.basicProfile.hireDate),
+      employeeID: await getNodeToString(page, selector.basicProfile.employeeID),
+      timeZone: await getNodeToString(page, selector.basicProfile.timeZone),
+      language: await getNodeToString(page, selector.basicProfile.language),
     },
   };
 
   browser.close();
 
-  return profileStringObject;
+  return profile;
 };
