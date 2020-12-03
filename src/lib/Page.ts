@@ -11,6 +11,17 @@ export const getNodeToString = async (
     .catch(() => "");
 };
 
+export const getNodeToHref = async (
+  page: Page,
+  selector: string
+): Promise<string> => {
+  return page
+    .$eval(selector, (e) => {
+      return e?.getAttribute("href");
+    })
+    .catch(() => "");
+};
+
 export const getNodesToStringsArray = async (
   page: Page,
   selector: string
@@ -19,6 +30,19 @@ export const getNodesToStringsArray = async (
     .$$eval(selector, (e) => {
       return e?.map((e) => {
         return e.textContent;
+      });
+    })
+    .catch(() => []);
+};
+
+export const getNodesToHrefArray = async (
+  page: Page,
+  selector: string
+): Promise<string[]> => {
+  return page
+    .$$eval(selector, (e) => {
+      return e?.map((e) => {
+        return e.getAttribute("href");
       });
     })
     .catch(() => []);
