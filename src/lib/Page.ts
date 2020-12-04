@@ -47,3 +47,10 @@ export const getNodesToHrefArray = async (
     })
     .catch(() => []);
 };
+
+export const getNodeToInnerText = async (
+  page: Page,
+  selector: string
+): Promise<string> => {
+  return await page.$eval(selector, (node) => (node as HTMLElement).innerText);
+};
