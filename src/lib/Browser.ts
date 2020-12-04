@@ -1,4 +1,4 @@
-import * as puppeteer from "puppeteer";
+import puppeteer from "puppeteer";
 
 export const createBrowser = (
   obj?: puppeteer.LaunchOptions
