@@ -26,20 +26,28 @@ export const getMails = async (option: {
   });
   page.waitForTimeout(1000);
   if (!option.browser) await login(page, option.auth);
-  let mails = await page.$$eval(selector.mailList, (nodes) => {
-    return nodes
-      ?.map(
-        (mail): mail => {
+  const mailsNode = await page.$$(selector.mailList);
+  let mails = (
+    await Promise.all(
+      mailsNode.map(async (mail) => {
+        return await mail.evaluate((mail) => {
           return {
             title: mail.textContent,
-            url: new URL(mail.getAttribute("href"), option.url).href,
+            url: mail.getAttribute("href"),
           };
-        }
-      )
-      .filter(({ url }) => {
-        return /mid=/.test(url);
+        });
+      })
+    )
+  )
+    .filter(({ url }) => {
+      return /mid=/.test(url);
+    })
+    .map((mail) => {
+      return (mail = {
+        url: new URL(mail.url, option.url).href,
+        title: mail.title,
       });
-  });
+    });
 
   if (mails.length > 29) {
     option.browser ??= browser;
