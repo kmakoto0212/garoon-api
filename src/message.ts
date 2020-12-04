@@ -7,6 +7,7 @@ import {
   getNodesToStringsArray,
   getNodeToHref,
   getNodesToHrefArray,
+  getNodeToInnerText,
 } from "./lib/Page";
 
 const sendMailSelector = {
@@ -144,7 +145,7 @@ export const getMailProperty = async (option: {
         await getNodesToHrefArray(page, mailPropertySelector.toExtra)
       ),
     },
-    text: await getNodeToString(page, mailPropertySelector.text),
+    text: await getNodeToInnerText(page, mailPropertySelector.text),
   };
 
   await browser.close();
