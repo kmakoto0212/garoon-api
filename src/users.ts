@@ -3,6 +3,7 @@ import { getNodeToString, getNodesToStringsArray } from "./lib/Page";
 import { login } from "./garoon";
 import { auth } from "./types/auth";
 import { user } from "./types/user";
+import { Browser, Page } from "puppeteer";
 
 const selector = {
   about:
@@ -42,9 +43,12 @@ const selector = {
 export const getProfile = async (option: {
   url: string;
   auth: auth;
+  browser?: Browser;
 }): Promise<user<string>> => {
-  const browser = await createBrowser();
-  const [page] = await browser.pages();
+  const browser = option.browser || (await createBrowser());
+  const page: Page = option.browser
+    ? await browser.newPage()
+    : await browser.pages()[0];
   await page.goto(option.url, {
     waitUntil: "networkidle2",
   });
