@@ -9,11 +9,11 @@ const loginSelector = {
 };
 
 export const isLogin = async (page: Page): Promise<boolean> => {
-  return !!(await page.$(loginSelector.dialog));
+  return !(await page.$(loginSelector.dialog));
 };
 
 export const login = async (page: Page, auth: auth): Promise<void> => {
-  if (!(await isLogin(page))) return;
+  if (await isLogin(page)) return;
 
   await page.type(loginSelector.inputUserName, auth.username);
   await page.type(loginSelector.inputPassword, auth.password);
