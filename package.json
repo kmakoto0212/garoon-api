@@ -1,10 +1,15 @@
 {
-  "name": "garoon-api",
-  "version": "1.0.0",
+  "name": "@kmakoto0212/garoon-puppeteer",
+  "version": "0.0.1",
   "description": "[WIP]ガルーンのスクレイピング用API",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
