@@ -1,14 +1,14 @@
-import { createBrowser } from "./lib/Browser";
-import { login } from "./garoon";
-import { auth } from "./types/auth";
-import { mailProperty } from "./types/mail";
+import { createBrowser } from "../lib/browser";
+import { login } from "..";
+import { auth } from "../types/auth";
+import { mailProperty } from "../types/mail";
 import {
   getNodeToString,
   getNodesToStringsArray,
   getNodeToHref,
   getNodesToHrefArray,
   getNodeToInnerText,
-} from "./lib/Page";
+} from "../lib/page";
 
 const sendMailSelector = {
   inputTitle:

@@ -1,6 +1,6 @@
 import { Browser, Page } from "puppeteer";
-import { login } from "../garoon";
-import { auth } from "../types/auth";
+import { login } from "../..";
+import { auth } from "../../types/auth";
 
 export const createPage = async (
   browser: Browser,

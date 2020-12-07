@@ -1,12 +1,12 @@
-import { createBrowser } from "./lib/Browser";
+import { createBrowser } from "../lib/browser";
 import {
   getNodeToString,
   getNodesToStringsArray,
   createPage,
-} from "./lib/Page";
-import { login } from "./garoon";
-import { auth } from "./types/auth";
-import { user } from "./types/user";
+} from "../lib/page";
+import { login } from "..";
+import { auth } from "../types/auth";
+import { user } from "../types/user";
 import { Browser, Page } from "puppeteer";
 
 const selector = {
