@@ -30,7 +30,10 @@
   "lint-staged": {
     "*.{js,ts}": "eslint --cache --fix",
     "*.{js,ts,css,md,json}": "prettier --write",
-    "*.{ts}": "tsc"
+    "*.{ts}": "tsc",
+    "ignore": [
+      "dist"
+    ]
   },
   "dependencies": {
     "p-limit": "^3.1.0",
