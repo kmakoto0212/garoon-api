@@ -1,5 +1,9 @@
 import { createBrowser } from "./lib/Browser";
-import { getNodeToString, getNodesToStringsArray } from "./lib/Page";
+import {
+  getNodeToString,
+  getNodesToStringsArray,
+  createPage,
+} from "./lib/Page";
 import { login } from "./garoon";
 import { auth } from "./types/auth";
 import { user } from "./types/user";
@@ -45,10 +49,8 @@ export const getProfile = async (option: {
   auth: auth;
   browser?: Browser;
 }): Promise<user<string>> => {
-  const browser = option.browser || (await createBrowser());
-  const page: Page = option.browser
-    ? await browser.newPage()
-    : await browser.pages()[0];
+  const browser: Browser = option.browser || (await createBrowser());
+  const page: Page = await createPage(browser);
   await page.goto(option.url, {
     waitUntil: "networkidle2",
   });
@@ -96,7 +98,11 @@ export const getProfile = async (option: {
     },
   };
 
-  browser.close();
+  if (option.browser) {
+    await page.close();
+  } else {
+    await browser.close();
+  }
 
   return profile;
 };
