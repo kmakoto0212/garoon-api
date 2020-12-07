@@ -1,8 +1,11 @@
 {
+  "include": ["src/**/*"],
   "compilerOptions": {
+    "outDir": "dist/",
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true
   }
 }
