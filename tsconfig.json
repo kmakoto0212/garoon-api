@@ -1,11 +1,13 @@
 {
   "include": ["src/**/*"],
   "compilerOptions": {
+    "target": "ESNext",
     "outDir": "dist/",
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "declaration": true
+    "declaration": true,
+    "moduleResolution": "Node"
   }
 }
