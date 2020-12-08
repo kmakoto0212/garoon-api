@@ -48,14 +48,14 @@ export const getProfile = async (option: {
   url: string;
   auth: auth;
   browser?: Browser;
-}): Promise<user<string>> => {
+}): Promise<user> => {
   const browser: Browser = option.browser || (await createBrowser());
   const page: Page = await createPage(browser);
   await page.goto(option.url, {
     waitUntil: "networkidle2",
   });
   await login(page, option.auth);
-  const profile: user<string> = {
+  const profile: user = {
     about: await getNodeToString(page, selector.about),
     basicProfile: {
       displayName: await getNodeToString(
