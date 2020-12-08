@@ -5,7 +5,8 @@ const selector = {
   mailList: "td > span > a",
 };
 export const getMails = async (option) => {
-  option.offset ??= 0;
+  var _a, _b;
+  (_a = option.offset) !== null && _a !== void 0 ? _a : (option.offset = 0);
   const browser = option.browser || (await createBrowser());
   const [page] = await browser.pages();
   const _url = new URL(option.url);
@@ -38,7 +39,9 @@ export const getMails = async (option) => {
       });
     });
   if (mails.length > 29) {
-    option.browser ??= browser;
+    (_b = option.browser) !== null && _b !== void 0
+      ? _b
+      : (option.browser = browser);
     option.offset = option.offset + 30;
     mails = mails.concat(await getMails(option));
   }

@@ -1,33 +1,33 @@
-export declare type user<T> = {
-  about: T | null;
+export declare type user = {
+  about: string | null;
   basicProfile: {
-    displayName: T | null;
+    displayName: string | null;
     name: {
-      surName: T | null;
-      givenName: T | null;
+      surName: string | null;
+      givenName: string | null;
     };
     yomigana?: {
-      surNameReading: T | null;
-      givenNameReading: T | null;
+      surNameReading: string | null;
+      givenNameReading: string | null;
     };
-    departments: T[];
-    priorityDepartment: T | null;
-    birthday: T | null;
-    hireDate: T | null;
-    employeeID: T | null;
-    timeZone: T | null;
-    language: T | null;
+    departments: string[];
+    priorityDepartment: string | null;
+    birthday: string | null;
+    hireDate: string | null;
+    employeeID: string | null;
+    timeZone: string | null;
+    language: string | null;
   };
   contactDetails?: {
-    "e-mailAddress": T | null;
-    MobilePhone: T | null;
-    Phone: T | null;
-    Extension: T | null;
-    skypeName: T | null;
+    "e-mailAddress": string | null;
+    MobilePhone: string | null;
+    Phone: string | null;
+    Extension: string | null;
+    skypeName: string | null;
   };
   Others?: {
-    localizedName: T | null;
-    URL: T | null;
-    ServicesInUses: T[];
+    localizedName: string | null;
+    URL: string | null;
+    ServicesInUses: string[];
   };
 };

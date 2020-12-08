@@ -1,8 +1,11 @@
 import { login } from "../..";
 export const createPage = async (browser, option) => {
+  var _a;
   const page = await browser.newPage();
-  option ??= {};
-  option.noImages ??= true;
+  option !== null && option !== void 0 ? option : (option = {});
+  (_a = option.noImages) !== null && _a !== void 0
+    ? _a
+    : (option.noImages = true);
   if (option.noImages) {
     await page.setRequestInterception(true);
     page.on("request", (request) => {
@@ -26,32 +29,36 @@ export const createPage = async (browser, option) => {
 export const getNodeToString = async (page, selector) => {
   return page
     .$eval(selector, (e) => {
-      return e?.textContent;
+      return e === null || e === void 0 ? void 0 : e.textContent;
     })
     .catch(() => "");
 };
 export const getNodeToHref = async (page, selector) => {
   return page
     .$eval(selector, (e) => {
-      return e?.getAttribute("href");
+      return e === null || e === void 0 ? void 0 : e.getAttribute("href");
     })
     .catch(() => "");
 };
 export const getNodesToStringsArray = async (page, selector) => {
   return page
     .$$eval(selector, (e) => {
-      return e?.map((e) => {
-        return e.textContent;
-      });
+      return e === null || e === void 0
+        ? void 0
+        : e.map((e) => {
+            return e.textContent;
+          });
     })
     .catch(() => []);
 };
 export const getNodesToHrefArray = async (page, selector) => {
   return page
     .$$eval(selector, (e) => {
-      return e?.map((e) => {
-        return e.getAttribute("href");
-      });
+      return e === null || e === void 0
+        ? void 0
+        : e.map((e) => {
+            return e.getAttribute("href");
+          });
     })
     .catch(() => []);
 };

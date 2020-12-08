@@ -15,3 +15,7 @@ export declare const getMailProperty: (option: {
   url: string;
   auth: auth;
 }) => Promise<mailProperty>;
+export declare const getDraftMailProperty: (option: {
+  url: string;
+  auth: auth;
+}) => Promise<Partial<mailProperty>>;

@@ -9,13 +9,17 @@ export const getUsersUrl = async (option) => {
   const _url = new URL(option.url);
   _url.searchParams.append("sp", option.offset.toString());
   await page.goto(_url.href, {
-    waitUntil: "domcontentloaded",
+    waitUntil: "networkidle2",
   });
-  page.waitForTimeout(1000);
   if (!option.browser) await login(page, option.auth);
-  let hrefs = await page.$$eval("dd > a", (elems) =>
-    elems.map((elem) => elem.getAttribute("href"))
+  let hrefs = await page.$$eval(
+    "#userlist_address_book > table > tbody > tr > td > a",
+    (elems) => elems.map((elem) => elem.getAttribute("href"))
   );
+  await page.screenshot({
+    path: "./screenshot.png",
+    fullPage: true,
+  });
   if (hrefs.length >= 29) {
     (_b = option.browser) !== null && _b !== void 0
       ? _b
