@@ -25,6 +25,10 @@ const sendMailSelector = {
   draftSubmit: "#message_button_draft > a",
 };
 
+const draftMailSelector = {
+  to: "#body > div.mainarea > table > tbody > tr:nth-child(1) > td > span > a",
+};
+
 const mailPropertySelector = {
   infoTableChild: "#info_area > table > tr",
   title: "#message_star_list > h2",
@@ -149,6 +153,35 @@ export const getMailProperty = async (option: {
   };
 
   await browser.close();
+
+  return mailProperty;
+};
+
+export const getDraftMailProperty = async (option: {
+  url: string;
+  auth: auth;
+}): Promise<Partial<mailProperty>> => {
+  const browser = await createBrowser({ headless: true });
+  const [page] = await browser.pages();
+  await page.goto(option.url, {
+    waitUntil: "networkidle2",
+  });
+  await login(page, option.auth);
+  const href = page.url();
+
+  const mailProperty: Partial<mailProperty> = {
+    href,
+    to: {
+      userNames: (
+        await getNodesToStringsArray(page, draftMailSelector.to)
+      ).concat(
+        await getNodesToStringsArray(page, mailPropertySelector.toExtra)
+      ),
+      userURLs: (await getNodesToHrefArray(page, draftMailSelector.to)).concat(
+        await getNodesToHrefArray(page, mailPropertySelector.toExtra)
+      ),
+    },
+  };
 
   return mailProperty;
 };
