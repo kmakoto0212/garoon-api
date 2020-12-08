@@ -1,4 +1,5 @@
 export type user = {
+  url: string;
   about: string | null;
   basicProfile: {
     displayName: string | null;
@@ -17,6 +18,9 @@ export type user = {
     employeeID: string | null;
     timeZone: string | null;
     language: string | null;
+  };
+  contacts: {
+    "e-mailAddress": string | null;
   };
   contactDetails?: {
     "e-mailAddress": string | null;
