@@ -18,9 +18,8 @@ export const createPage = async (
   if (option.noImages) {
     await page.setRequestInterception(true);
     page.on("request", (request) => {
-      if (
-        ["image", "stylesheet", "font"].indexOf(request.resourceType()) !== -1
-      ) {
+      const resourceType = request.resourceType();
+      if (["image", "stylesheet", "font"].includes(resourceType)) {
         request.abort();
       } else {
         request.continue();
