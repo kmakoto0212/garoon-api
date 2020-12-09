@@ -7,6 +7,11 @@ import { mail } from "../types/mail";
 
 const selector = {
   mailList: "td > span > a",
+  mailBox: "#message_list > tbody > tr",
+  moveTo: "#dcid1",
+  allMailsCheckButton:
+    "#view_part > div:nth-child(3) > span:nth-child(1) > button",
+  moveSubmit: "#moveto",
 };
 
 export const getMails = async (option: {
@@ -57,4 +62,32 @@ export const getMails = async (option: {
   browser.close();
 
   return mails;
+};
+
+export const moveMails = async (option: {
+  url: string;
+  auth: auth;
+  moveToCid: string;
+  offset?: number;
+  browser?: Browser;
+  delay?: number;
+}): Promise<void> => {
+  const browser = option.browser || (await createBrowser({}));
+  const [page] = await browser.pages();
+
+  await page.goto(option.url, {
+    waitUntil: "networkidle0",
+  });
+  if (!option.browser) await login(page, option.auth);
+
+  while ((await page.$$(selector.mailBox)).length > 1) {
+    await page.click(selector.allMailsCheckButton);
+    await page.select(selector.moveTo, option.moveToCid);
+    await page.click(selector.moveSubmit);
+    await page.waitForTimeout(option.delay || 1000);
+  }
+
+  await browser.close();
+
+  return;
 };
