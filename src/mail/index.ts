@@ -33,18 +33,16 @@ const mailPropertySelector = {
   infoTableChild: "#info_area > table > tr",
   title: "#message_star_list > h2",
   from: "#info_area > table > tbody > tr:nth-child(1) > td:nth-child(3) > a",
+  createdTime: "#info_area > table > tbody > tr:nth-child(1) > td:nth-child(3)",
   noChange: {
     to:
       "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3) > span > a",
-    showButton: "#display_addressee_close > span > small > a",
   },
   change: {
     lastUpdateUser:
       "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3) > a",
     to:
       "#info_area > table > tbody > tr:nth-child(3) > td:nth-child(3) > span > a",
-    showButton:
-      "#info_area > table > tbody > tr:nth-child(3) > td:nth-child(1) > a",
   },
   toExtra: "#display_addressee_open > span > a",
   CloseButtonImg: "#display_swith_image_close",
@@ -129,10 +127,18 @@ export const getMailProperty = async (option: {
       ? mailPropertySelector.change.to
       : mailPropertySelector.noChange.to,
     lastUpdateUser: isChange ? mailPropertySelector.change.lastUpdateUser : "",
-    showButton: isChange
-      ? mailPropertySelector.change.showButton
-      : mailPropertySelector.noChange.showButton,
   };
+
+  /*
+  console.log(
+    await page.$eval(mailPropertySelector.createdTime, (x) => {
+      //2020年11月30日（月） 11:45
+      const rawDate = x.innerHTML.split("&nbsp;")[1];
+      const date = /([0-9]{4})年/.exec(rawDate)[0];
+      return new Date(x.innerHTML.split("&nbsp;")[1]);
+    })
+  );
+  */
 
   const mailProperty: mailProperty = {
     href,
