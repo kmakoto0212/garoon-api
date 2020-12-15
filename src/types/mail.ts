@@ -10,8 +10,8 @@ export type mailProperty = {
     userName: string;
     userURL: string;
   };
-  createdTime?: Date;
-  UpdatedTime?: Date;
+  createdTime?: string;
+  UpdatedTime?: string;
   to: {
     userNames: string[];
     userURLs: string[];
