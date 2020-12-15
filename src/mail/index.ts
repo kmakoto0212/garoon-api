@@ -9,6 +9,7 @@ import {
   getNodesToHrefArray,
   getNodeToInnerText,
 } from "../lib/page";
+import { getISOString } from "../lib/utils";
 
 const sendMailSelector = {
   inputTitle:
@@ -129,17 +130,6 @@ export const getMailProperty = async (option: {
     lastUpdateUser: isChange ? mailPropertySelector.change.lastUpdateUser : "",
   };
 
-  /*
-  console.log(
-    await page.$eval(mailPropertySelector.createdTime, (x) => {
-      //2020年11月30日（月） 11:45
-      const rawDate = x.innerHTML.split("&nbsp;")[1];
-      const date = /([0-9]{4})年/.exec(rawDate)[0];
-      return new Date(x.innerHTML.split("&nbsp;")[1]);
-    })
-  );
-  */
-
   const mailProperty: mailProperty = {
     href,
     title: await getNodeToString(page, mailPropertySelector.title),
@@ -147,6 +137,11 @@ export const getMailProperty = async (option: {
       userName: await getNodeToString(page, mailPropertySelector.from),
       userURL: await getNodeToHref(page, mailPropertySelector.from),
     },
+    createdTime: await page
+      .$eval(mailPropertySelector.createdTime, (x) => {
+        return x.innerHTML.split("&nbsp;")[1];
+      })
+      .then(getISOString),
     to: {
       userNames: (await getNodesToStringsArray(page, _selector.to)).concat(
         await getNodesToStringsArray(page, mailPropertySelector.toExtra)
