@@ -42,12 +42,14 @@ const mailPropertySelector = {
   change: {
     lastUpdateUser:
       "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3) > a",
+    lastUpdateTime:
+      "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3)",
     to:
       "#info_area > table > tbody > tr:nth-child(3) > td:nth-child(3) > span > a",
   },
   toExtra: "#display_addressee_open > span > a",
   CloseButtonImg: "#display_swith_image_close",
-  text: "#info_area > div.bodytext_base_grn > div > pre",
+  text: "#info_area > div.bodytext_base_grn > div",
 };
 
 export const postMailMessage = async (option: {
@@ -127,7 +129,16 @@ export const getMailProperty = async (option: {
     to: isChange
       ? mailPropertySelector.change.to
       : mailPropertySelector.noChange.to,
-    lastUpdateUser: isChange ? mailPropertySelector.change.lastUpdateUser : "",
+    lastUpdateUser: mailPropertySelector.change.lastUpdateUser,
+    lastUpdateTime: mailPropertySelector.change.lastUpdateTime,
+  };
+
+  const garoonGetTime = async (selector: string): Promise<string> => {
+    if (!selector) return "";
+    return await page.evaluate((selector: string) => {
+      const node = document.querySelector(selector);
+      return node.innerHTML.split("&nbsp;")[1];
+    }, selector);
   };
 
   const mailProperty: mailProperty = {
@@ -137,11 +148,12 @@ export const getMailProperty = async (option: {
       userName: await getNodeToString(page, mailPropertySelector.from),
       userURL: await getNodeToHref(page, mailPropertySelector.from),
     },
-    createdTime: await page
-      .$eval(mailPropertySelector.createdTime, (x) => {
-        return x.innerHTML.split("&nbsp;")[1];
-      })
-      .then(getISOString),
+    createdTime: await garoonGetTime(
+      mailPropertySelector.createdTime
+    ).then((x) => getISOString(x)),
+    UpdatedTime: await garoonGetTime(_selector.lastUpdateTime).then((x) =>
+      getISOString(x)
+    ),
     to: {
       userNames: (await getNodesToStringsArray(page, _selector.to)).concat(
         await getNodesToStringsArray(page, mailPropertySelector.toExtra)
