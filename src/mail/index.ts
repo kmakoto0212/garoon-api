@@ -31,7 +31,7 @@ const draftMailSelector = {
 };
 
 const mailPropertySelector = {
-  infoTableChild: "#info_area > table > tr",
+  infoTableChild: "#info_area > table > tbody > tr",
   title: "#message_star_list > h2",
   from: "#info_area > table > tbody > tr:nth-child(1) > td:nth-child(3) > a",
   createdTime: "#info_area > table > tbody > tr:nth-child(1) > td:nth-child(3)",
@@ -49,7 +49,7 @@ const mailPropertySelector = {
   },
   toExtra: "#display_addressee_open > span > a",
   CloseButtonImg: "#display_swith_image_close",
-  text: "#info_area > div.bodytext_base_grn > div",
+  text: "#info_area > div.bodytext_base_grn > div.margin_all",
 };
 
 type user = {
@@ -170,10 +170,14 @@ export const getMailProperty = async (option: {
     createdTime: await garoonGetTime(
       mailPropertySelector.createdTime
     ).then((x) => getISOString(x)),
+    UpdateUser: {
+      userName: await getNodeToString(page, _selector.lastUpdateUser),
+      userUrl: await getNodeToHref(page, _selector.lastUpdateUser),
+    },
     UpdatedTime: await garoonGetTime(_selector.lastUpdateTime).then((x) =>
       getISOString(x)
     ),
-    to: (await getUsers(page, mailPropertySelector.from)).concat(
+    to: (await getUsers(page, _selector.to)).concat(
       await getUsers(page, mailPropertySelector.toExtra)
     ),
     text: await getNodeToInnerText(page, mailPropertySelector.text),
