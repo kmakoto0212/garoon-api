@@ -4,12 +4,12 @@ import { auth } from "../types/auth";
 import { mailProperty } from "../types/mail";
 import {
   getNodeToString,
-  getNodesToStringsArray,
   getNodeToHref,
-  getNodesToHrefArray,
   getNodeToInnerText,
+  createPage,
 } from "../lib/page";
 import { getISOString } from "../lib/utils";
+import { Browser, Page } from "puppeteer";
 
 const sendMailSelector = {
   inputTitle:
@@ -50,6 +50,24 @@ const mailPropertySelector = {
   toExtra: "#display_addressee_open > span > a",
   CloseButtonImg: "#display_swith_image_close",
   text: "#info_area > div.bodytext_base_grn > div",
+};
+
+type user = {
+  userName: string;
+  userUrl: string;
+};
+
+const getUsers = async (page: Page, selector: string): Promise<user[]> => {
+  return await page.$$eval(selector, (users) => {
+    return users.map(
+      (user): user => {
+        return {
+          userName: user.textContent,
+          userUrl: user.getAttribute("href"),
+        };
+      }
+    );
+  });
 };
 
 export const postMailMessage = async (option: {
@@ -114,9 +132,10 @@ export const postMailMessage = async (option: {
 export const getMailProperty = async (option: {
   url: string;
   auth: auth;
+  browser?: Browser;
 }): Promise<mailProperty> => {
-  const browser = await createBrowser({ headless: true });
-  const [page] = await browser.pages();
+  const browser: Browser = option.browser || (await createBrowser());
+  const page: Page = await createPage(browser);
   await page.goto(option.url, {
     waitUntil: "networkidle2",
   });
@@ -146,7 +165,7 @@ export const getMailProperty = async (option: {
     title: await getNodeToString(page, mailPropertySelector.title),
     from: {
       userName: await getNodeToString(page, mailPropertySelector.from),
-      userURL: await getNodeToHref(page, mailPropertySelector.from),
+      userUrl: await getNodeToHref(page, mailPropertySelector.from),
     },
     createdTime: await garoonGetTime(
       mailPropertySelector.createdTime
@@ -154,18 +173,17 @@ export const getMailProperty = async (option: {
     UpdatedTime: await garoonGetTime(_selector.lastUpdateTime).then((x) =>
       getISOString(x)
     ),
-    to: {
-      userNames: (await getNodesToStringsArray(page, _selector.to)).concat(
-        await getNodesToStringsArray(page, mailPropertySelector.toExtra)
-      ),
-      userURLs: (await getNodesToHrefArray(page, _selector.to)).concat(
-        await getNodesToHrefArray(page, mailPropertySelector.toExtra)
-      ),
-    },
+    to: (await getUsers(page, mailPropertySelector.from)).concat(
+      await getUsers(page, mailPropertySelector.toExtra)
+    ),
     text: await getNodeToInnerText(page, mailPropertySelector.text),
   };
 
-  await browser.close();
+  if (option.browser) {
+    await page.close();
+  } else {
+    await browser.close();
+  }
 
   return mailProperty;
 };
@@ -184,16 +202,7 @@ export const getDraftMailProperty = async (option: {
 
   const mailProperty: Partial<mailProperty> = {
     href,
-    to: {
-      userNames: (
-        await getNodesToStringsArray(page, draftMailSelector.to)
-      ).concat(
-        await getNodesToStringsArray(page, mailPropertySelector.toExtra)
-      ),
-      userURLs: (await getNodesToHrefArray(page, draftMailSelector.to)).concat(
-        await getNodesToHrefArray(page, mailPropertySelector.toExtra)
-      ),
-    },
+    to: await getUsers(page, draftMailSelector.to),
   };
 
   return mailProperty;

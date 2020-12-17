@@ -3,18 +3,17 @@ export type mail = {
   url: string;
 };
 
+type user = {
+  userName: string;
+  userUrl: string;
+};
+
 export type mailProperty = {
   href: string;
   title: string;
-  from: {
-    userName: string;
-    userURL: string;
-  };
+  from: user;
   createdTime?: string;
   UpdatedTime?: string;
-  to: {
-    userNames: string[];
-    userURLs: string[];
-  };
+  to: user[];
   text: string;
 };
