@@ -18,6 +18,7 @@ export const promiseAll = async <T>(
 };
 
 export const getISOString = (date: string): string => {
+  if (!date) return "";
   const [
     ,
     year,
