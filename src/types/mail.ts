@@ -12,8 +12,9 @@ export type mailProperty = {
   href: string;
   title: string;
   from: user;
-  createdTime?: string;
-  UpdatedTime?: string;
+  createdTime: string;
+  UpdateUser: user;
+  UpdatedTime: string;
   to: user[];
   text: string;
 };
