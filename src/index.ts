@@ -8,6 +8,14 @@ const loginSelector = {
   submit: ".login-button",
 };
 
+const errorSelector = {
+  dialog: "body > div.error_content_grn",
+};
+
+export const isError = async (page: Page): Promise<boolean> => {
+  return !(await page.$(errorSelector.dialog));
+};
+
 export const isLogin = async (page: Page): Promise<boolean> => {
   return !(await page.$(loginSelector.dialog));
 };
