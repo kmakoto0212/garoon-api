@@ -1,4 +1,5 @@
 import pLimit from "p-limit";
+import { URL } from "url";
 
 export const isValidateUrl = (url: string): boolean => {
   return /https:\/\/[a-zA-Z0-9]+\.cybozu\.com\//.test(url);
@@ -32,4 +33,8 @@ export const getISOString = (date: string): string => {
   const strDate = `${year}-${month}-${day}T${hour}:${minitts}:00`;
   const Data = new Date(strDate);
   return Data.toISOString();
+};
+
+export const getFullUrl = (targetUrl: string, baseUrl: string): string => {
+  return new URL(targetUrl, baseUrl).href;
 };
