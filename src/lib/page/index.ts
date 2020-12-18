@@ -1,6 +1,6 @@
 import { Browser, Page } from "puppeteer";
 import { login } from "../..";
-import { auth } from "../../types/auth";
+import { Auth } from "../../types/auth";
 
 export const createPage = async (
   browser: Browser,
@@ -8,7 +8,7 @@ export const createPage = async (
     noImages?: boolean;
     preLogin?: {
       url: string;
-      auth: auth;
+      auth: Auth;
     };
   }
 ): Promise<Page> => {

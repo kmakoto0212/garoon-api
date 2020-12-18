@@ -1,12 +1,12 @@
 import { createBrowser } from "../lib/browser";
 import { login } from "..";
-import { auth } from "../types/auth";
+import { Auth } from "../types/auth";
 import { URL } from "url";
 import { Browser } from "puppeteer";
 
 export const getUsersValues = async (option: {
   url: string;
-  auth: auth;
+  auth: Auth;
   offset?: number;
   browser?: Browser;
 }): Promise<string[]> => {

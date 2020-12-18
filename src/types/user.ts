@@ -1,4 +1,4 @@
-export type user = {
+export type User = {
   url: string;
   about: string | null;
   basicProfile: {

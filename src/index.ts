@@ -1,5 +1,5 @@
 import { Page } from "puppeteer";
-import { auth } from "./types/auth";
+import { Auth } from "./types/auth";
 
 const loginSelector = {
   dialog: "#login-dialog",
@@ -20,7 +20,7 @@ export const isLogin = async (page: Page): Promise<boolean> => {
   return !(await page.$(loginSelector.dialog));
 };
 
-export const login = async (page: Page, auth: auth): Promise<void> => {
+export const login = async (page: Page, auth: Auth): Promise<void> => {
   if (await isLogin(page)) return;
 
   await page.type(loginSelector.inputUserName, auth.username);

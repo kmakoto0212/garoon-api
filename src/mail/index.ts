@@ -1,6 +1,6 @@
 import { createBrowser } from "../lib/browser";
 import { login, isError } from "..";
-import { auth } from "../types/auth";
+import { Auth } from "../types/auth";
 import { MailProperty, User, File } from "../types/mail";
 import {
   getNodeToString,
@@ -94,7 +94,7 @@ const getFiles = async (
 
 export const postMailMessage = async (option: {
   url: string;
-  auth: auth;
+  auth: Auth;
   title: string;
   body: string;
   to: string[];
@@ -153,7 +153,7 @@ export const postMailMessage = async (option: {
 
 export const getMailProperty = async (option: {
   url: string;
-  auth: auth;
+  auth: Auth;
   browser?: Browser;
 }): Promise<MailProperty> => {
   const browser: Browser = option.browser || (await createBrowser());
@@ -235,7 +235,7 @@ export const getMailProperty = async (option: {
 
 export const getDraftMailProperty = async (option: {
   url: string;
-  auth: auth;
+  auth: Auth;
 }): Promise<Partial<MailProperty>> => {
   const browser = await createBrowser({ headless: true });
   const [page] = await browser.pages();

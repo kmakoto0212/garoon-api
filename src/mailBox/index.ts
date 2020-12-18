@@ -1,6 +1,6 @@
 import { createBrowser } from "../lib/browser";
 import { login } from "..";
-import { auth } from "../types/auth";
+import { Auth } from "../types/auth";
 import { URL } from "url";
 import { Browser } from "puppeteer";
 import { Mail } from "../types/mail";
@@ -17,7 +17,7 @@ const selector = {
 
 export const getMails = async (option: {
   url: string;
-  auth: auth;
+  auth: Auth;
   offset?: number;
   browser?: Browser;
 }): Promise<Mail[]> => {
@@ -67,7 +67,7 @@ export const getMails = async (option: {
 
 export const moveMails = async (option: {
   url: string;
-  auth: auth;
+  auth: Auth;
   moveToCid: string;
   offset?: number;
   browser?: Browser;

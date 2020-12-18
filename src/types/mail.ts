@@ -1,20 +1,26 @@
-export type mail = {
+export type Mail = {
   title: string;
   url: string;
 };
 
-type user = {
+export type User = {
   userName: string;
   userUrl: string;
 };
 
-export type mailProperty = {
+export type File = {
+  fileName: string;
+  fileUrl: string;
+};
+
+export type MailProperty = {
   href: string;
   title: string;
-  from: user;
+  from: User;
   createdTime: string;
-  UpdateUser: user;
+  UpdateUser: User;
   UpdatedTime: string;
-  to: user[];
+  to: User[];
   text: string;
+  attachments: File[] | "";
 };

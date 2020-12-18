@@ -5,8 +5,8 @@ import {
   createPage,
 } from "../lib/page";
 import { login } from "..";
-import { auth } from "../types/auth";
-import { user } from "../types/user";
+import { Auth } from "../types/auth";
+import { User } from "../types/user";
 import { Browser, Page } from "puppeteer";
 
 const selector = {
@@ -50,9 +50,9 @@ const selector = {
 
 export const getProfile = async (option: {
   url: string;
-  auth: auth;
+  auth: Auth;
   browser?: Browser;
-}): Promise<user> => {
+}): Promise<User> => {
   const browser: Browser = option.browser || (await createBrowser());
   const page: Page = await createPage(browser);
   await page.goto(option.url, {
@@ -60,7 +60,7 @@ export const getProfile = async (option: {
   });
   await login(page, option.auth);
   const url = page.url();
-  const profile: user = {
+  const profile: User = {
     url: url,
     about: await getNodeToString(page, selector.about),
     basicProfile: {
