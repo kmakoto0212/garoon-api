@@ -161,11 +161,18 @@ export const getMailProperty = async (option: {
   await page.goto(option.url, {
     waitUntil: "networkidle2",
   });
-  const href = page.url();
   await login(page, option.auth);
+
   if (await isError(page)) {
-    throw new Error(`${href} is invalid url.`);
+    if (option.browser) {
+      await page.close();
+    } else {
+      await browser.close();
+    }
+    throw new Error(`"${option.url}" is an invalid URL.`);
   }
+
+  const href = page.url();
 
   const isChange =
     (await page.$$(mailPropertySelector.infoTableChild)).length > 2;
