@@ -1,14 +1,14 @@
 import { createBrowser } from "../lib/browser";
 import { login } from "..";
 import { auth } from "../types/auth";
-import { mailProperty } from "../types/mail";
+import { MailProperty, User, File } from "../types/mail";
 import {
   getNodeToString,
   getNodeToHref,
   getNodeToInnerText,
   createPage,
 } from "../lib/page";
-import { getISOString } from "../lib/utils";
+import { getISOString, getFullUrl } from "../lib/utils";
 import { Browser, Page } from "puppeteer";
 
 const sendMailSelector = {
@@ -50,17 +50,13 @@ const mailPropertySelector = {
   toExtra: "#display_addressee_open > span > a",
   CloseButtonImg: "#display_swith_image_close",
   text: "#info_area > div.bodytext_base_grn > div.margin_all",
+  attachments: "#info_area > div.bodytext_base_grn > p > tt > a",
 };
 
-type user = {
-  userName: string;
-  userUrl: string;
-};
-
-const getUsers = async (page: Page, selector: string): Promise<user[]> => {
+const getUsers = async (page: Page, selector: string): Promise<User[]> => {
   return await page.$$eval(selector, (users) => {
     return users.map(
-      (user): user => {
+      (user): User => {
         return {
           userName: user.textContent,
           userUrl: user.getAttribute("href"),
@@ -68,6 +64,32 @@ const getUsers = async (page: Page, selector: string): Promise<user[]> => {
       }
     );
   });
+};
+
+const getFiles = async (
+  page: Page,
+  selector: string,
+  baseUrl: string
+): Promise<File[]> => {
+  return await page
+    .$$eval(selector, (files) => {
+      return files.map(
+        (file): File => {
+          return {
+            fileName: file.textContent,
+            fileUrl: file.getAttribute("href"),
+          };
+        }
+      );
+    })
+    .then((files) => {
+      return files.map(({ fileName, fileUrl }) => {
+        return {
+          fileName: fileName || /message\/(.*)\?/.exec(fileUrl)[1],
+          fileUrl: getFullUrl(fileUrl, baseUrl),
+        };
+      });
+    });
 };
 
 export const postMailMessage = async (option: {
@@ -133,7 +155,7 @@ export const getMailProperty = async (option: {
   url: string;
   auth: auth;
   browser?: Browser;
-}): Promise<mailProperty> => {
+}): Promise<MailProperty> => {
   const browser: Browser = option.browser || (await createBrowser());
   const page: Page = await createPage(browser);
   await page.goto(option.url, {
@@ -160,7 +182,7 @@ export const getMailProperty = async (option: {
     }, selector);
   };
 
-  const mailProperty: mailProperty = {
+  const mailProperty: MailProperty = {
     href,
     title: await getNodeToString(page, mailPropertySelector.title),
     from: {
@@ -181,6 +203,15 @@ export const getMailProperty = async (option: {
       await getUsers(page, mailPropertySelector.toExtra)
     ),
     text: await getNodeToInnerText(page, mailPropertySelector.text),
+    attachments: await getFiles(
+      page,
+      mailPropertySelector.attachments,
+      option.url
+    ).then((files) => {
+      return files.filter(({ fileName }) => {
+        return !/\[.*\]/.test(fileName); //not attachments is ignore.
+      });
+    }),
   };
 
   if (option.browser) {
@@ -195,7 +226,7 @@ export const getMailProperty = async (option: {
 export const getDraftMailProperty = async (option: {
   url: string;
   auth: auth;
-}): Promise<Partial<mailProperty>> => {
+}): Promise<Partial<MailProperty>> => {
   const browser = await createBrowser({ headless: true });
   const [page] = await browser.pages();
   await page.goto(option.url, {
@@ -204,7 +235,7 @@ export const getDraftMailProperty = async (option: {
   await login(page, option.auth);
   const href = page.url();
 
-  const mailProperty: Partial<mailProperty> = {
+  const mailProperty: Partial<MailProperty> = {
     href,
     to: await getUsers(page, draftMailSelector.to),
   };
