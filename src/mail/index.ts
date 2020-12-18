@@ -1,5 +1,5 @@
 import { createBrowser } from "../lib/browser";
-import { login } from "..";
+import { login, isError } from "..";
 import { auth } from "../types/auth";
 import { MailProperty, User, File } from "../types/mail";
 import {
@@ -161,8 +161,11 @@ export const getMailProperty = async (option: {
   await page.goto(option.url, {
     waitUntil: "networkidle2",
   });
-  await login(page, option.auth);
   const href = page.url();
+  await login(page, option.auth);
+  if (await isError(page)) {
+    throw new Error(`${href} is invalid url.`);
+  }
 
   const isChange =
     (await page.$$(mailPropertySelector.infoTableChild)).length > 2;
