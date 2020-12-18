@@ -3,7 +3,8 @@ import { login } from "..";
 import { auth } from "../types/auth";
 import { URL } from "url";
 import { Browser } from "puppeteer";
-import { mail } from "../types/mail";
+import { Mail } from "../types/mail";
+import { getFullUrl } from "../lib/utils";
 
 const selector = {
   mailList: "td > span > a",
@@ -19,7 +20,7 @@ export const getMails = async (option: {
   auth: auth;
   offset?: number;
   browser?: Browser;
-}): Promise<mail[]> => {
+}): Promise<Mail[]> => {
   option.offset ??= 0;
   const browser = option.browser || (await createBrowser());
   const [page] = await browser.pages();
@@ -49,7 +50,7 @@ export const getMails = async (option: {
     })
     .map((mail) => {
       return (mail = {
-        url: new URL(mail.url, option.url).href,
+        url: getFullUrl(mail.url, option.url),
         title: mail.title,
       });
     });
