@@ -1,8 +1,9 @@
-import { auth } from "../types/auth";
-import { mailProperty } from "../types/mail";
+import { Auth } from "../types/auth";
+import { MailProperty } from "../types/mail";
+import { Browser } from "puppeteer";
 export declare const postMailMessage: (option: {
   url: string;
-  auth: auth;
+  auth: Auth;
   title: string;
   body: string;
   to: string[];
@@ -13,9 +14,10 @@ export declare const postMailMessage: (option: {
 }) => Promise<void>;
 export declare const getMailProperty: (option: {
   url: string;
-  auth: auth;
-}) => Promise<mailProperty>;
+  auth: Auth;
+  browser?: Browser;
+}) => Promise<MailProperty>;
 export declare const getDraftMailProperty: (option: {
   url: string;
-  auth: auth;
-}) => Promise<Partial<mailProperty>>;
+  auth: Auth;
+}) => Promise<Partial<MailProperty>>;

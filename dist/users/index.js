@@ -38,6 +38,10 @@ const selector = {
     language:
       "#js-settings-content > div.b-settings-profile-general > div > div.b-form-form.b-form-edittoggleform.is-readonly > dl:nth-child(10) > dd > div > span",
   },
+  contacts: {
+    "e-mailAddress":
+      "#js-settings-overview > div.b-settings-overview-contact > ul > li.b-settings-overview-contact-item.b-settings-overview-contact-email > a",
+  },
 };
 export const getProfile = async (option) => {
   const browser = option.browser || (await createBrowser());
@@ -46,7 +50,9 @@ export const getProfile = async (option) => {
     waitUntil: "networkidle2",
   });
   await login(page, option.auth);
+  const url = page.url();
   const profile = {
+    url: url,
     about: await getNodeToString(page, selector.about),
     basicProfile: {
       displayName: await getNodeToString(
@@ -86,6 +92,12 @@ export const getProfile = async (option) => {
       employeeID: await getNodeToString(page, selector.basicProfile.employeeID),
       timeZone: await getNodeToString(page, selector.basicProfile.timeZone),
       language: await getNodeToString(page, selector.basicProfile.language),
+    },
+    contacts: {
+      "e-mailAddress": await getNodeToString(
+        page,
+        selector.contacts["e-mailAddress"]
+      ),
     },
   };
   if (option.browser) {

@@ -1,12 +1,12 @@
 import { createBrowser } from "../lib/browser";
-import { login } from "..";
+import { login, isError } from "..";
 import {
   getNodeToString,
-  getNodesToStringsArray,
   getNodeToHref,
-  getNodesToHrefArray,
   getNodeToInnerText,
+  createPage,
 } from "../lib/page";
+import { getISOString, getFullUrl } from "../lib/utils";
 const sendMailSelector = {
   inputTitle:
     "#body > div.mainarea > form > table > tbody > tr:nth-child(1) > td > input[type=text]",
@@ -25,25 +25,55 @@ const draftMailSelector = {
   to: "#body > div.mainarea > table > tbody > tr:nth-child(1) > td > span > a",
 };
 const mailPropertySelector = {
-  infoTableChild: "#info_area > table > tr",
+  infoTableChild: "#info_area > table > tbody > tr",
   title: "#message_star_list > h2",
   from: "#info_area > table > tbody > tr:nth-child(1) > td:nth-child(3) > a",
+  createdTime: "#info_area > table > tbody > tr:nth-child(1) > td:nth-child(3)",
   noChange: {
     to:
       "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3) > span > a",
-    showButton: "#display_addressee_close > span > small > a",
   },
   change: {
     lastUpdateUser:
       "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3) > a",
+    lastUpdateTime:
+      "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3)",
     to:
       "#info_area > table > tbody > tr:nth-child(3) > td:nth-child(3) > span > a",
-    showButton:
-      "#info_area > table > tbody > tr:nth-child(3) > td:nth-child(1) > a",
   },
   toExtra: "#display_addressee_open > span > a",
   CloseButtonImg: "#display_swith_image_close",
-  text: "#info_area > div.bodytext_base_grn > div > pre",
+  text: "#info_area > div.bodytext_base_grn > div.margin_all",
+  attachments: "#info_area > div.bodytext_base_grn > p > tt > a",
+};
+const getUsers = async (page, selector) => {
+  return await page.$$eval(selector, (users) => {
+    return users.map((user) => {
+      return {
+        userName: user.textContent,
+        userUrl: user.getAttribute("href"),
+      };
+    });
+  });
+};
+const getFiles = async (page, selector, baseUrl) => {
+  return await page
+    .$$eval(selector, (files) => {
+      return files.map((file) => {
+        return {
+          fileName: file.textContent,
+          fileUrl: file.getAttribute("href"),
+        };
+      });
+    })
+    .then((files) => {
+      return files.map(({ fileName, fileUrl }) => {
+        return {
+          fileName: fileName || /message\/(.*)\?/.exec(fileUrl)[1],
+          fileUrl: getFullUrl(fileUrl, baseUrl),
+        };
+      });
+    });
 };
 export const postMailMessage = async (option) => {
   const browser = await createBrowser({
@@ -90,12 +120,20 @@ export const postMailMessage = async (option) => {
   return;
 };
 export const getMailProperty = async (option) => {
-  const browser = await createBrowser({ headless: true });
-  const [page] = await browser.pages();
+  const browser = option.browser || (await createBrowser());
+  const page = await createPage(browser);
   await page.goto(option.url, {
     waitUntil: "networkidle2",
   });
   await login(page, option.auth);
+  if (await isError(page)) {
+    if (option.browser) {
+      await page.close();
+    } else {
+      await browser.close();
+    }
+    throw new Error(`"${option.url}" is an invalid URL.`);
+  }
   const href = page.url();
   const isChange =
     (await page.$$(mailPropertySelector.infoTableChild)).length > 2;
@@ -103,29 +141,52 @@ export const getMailProperty = async (option) => {
     to: isChange
       ? mailPropertySelector.change.to
       : mailPropertySelector.noChange.to,
-    lastUpdateUser: isChange ? mailPropertySelector.change.lastUpdateUser : "",
-    showButton: isChange
-      ? mailPropertySelector.change.showButton
-      : mailPropertySelector.noChange.showButton,
+    lastUpdateUser: mailPropertySelector.change.lastUpdateUser,
+    lastUpdateTime: mailPropertySelector.change.lastUpdateTime,
+  };
+  const garoonGetTime = async (selector) => {
+    if (!selector) return "";
+    return await page.evaluate((selector) => {
+      const node = document.querySelector(selector);
+      return node.innerHTML.split("&nbsp;")[1];
+    }, selector);
   };
   const mailProperty = {
     href,
     title: await getNodeToString(page, mailPropertySelector.title),
     from: {
       userName: await getNodeToString(page, mailPropertySelector.from),
-      userURL: await getNodeToHref(page, mailPropertySelector.from),
+      userUrl: await getNodeToHref(page, mailPropertySelector.from),
     },
-    to: {
-      userNames: (await getNodesToStringsArray(page, _selector.to)).concat(
-        await getNodesToStringsArray(page, mailPropertySelector.toExtra)
-      ),
-      userURLs: (await getNodesToHrefArray(page, _selector.to)).concat(
-        await getNodesToHrefArray(page, mailPropertySelector.toExtra)
-      ),
+    createdTime: await garoonGetTime(
+      mailPropertySelector.createdTime
+    ).then((x) => getISOString(x)),
+    UpdateUser: {
+      userName: await getNodeToString(page, _selector.lastUpdateUser),
+      userUrl: await getNodeToHref(page, _selector.lastUpdateUser),
     },
+    UpdatedTime: await garoonGetTime(_selector.lastUpdateTime).then((x) =>
+      getISOString(x)
+    ),
+    to: (await getUsers(page, _selector.to)).concat(
+      await getUsers(page, mailPropertySelector.toExtra)
+    ),
     text: await getNodeToInnerText(page, mailPropertySelector.text),
+    attachments: await getFiles(
+      page,
+      mailPropertySelector.attachments,
+      option.url
+    ).then((files) => {
+      return files.filter(({ fileName }) => {
+        return !/\[.*\]/.test(fileName); //not attachments is ignore.
+      });
+    }),
   };
-  await browser.close();
+  if (option.browser) {
+    await page.close();
+  } else {
+    await browser.close();
+  }
   return mailProperty;
 };
 export const getDraftMailProperty = async (option) => {
@@ -138,16 +199,7 @@ export const getDraftMailProperty = async (option) => {
   const href = page.url();
   const mailProperty = {
     href,
-    to: {
-      userNames: (
-        await getNodesToStringsArray(page, draftMailSelector.to)
-      ).concat(
-        await getNodesToStringsArray(page, mailPropertySelector.toExtra)
-      ),
-      userURLs: (await getNodesToHrefArray(page, draftMailSelector.to)).concat(
-        await getNodesToHrefArray(page, mailPropertySelector.toExtra)
-      ),
-    },
+    to: await getUsers(page, draftMailSelector.to),
   };
   return mailProperty;
 };

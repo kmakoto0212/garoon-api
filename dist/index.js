@@ -4,6 +4,12 @@ const loginSelector = {
   inputPassword: "#password-\\:1-text",
   submit: ".login-button",
 };
+const errorSelector = {
+  dialog: "body > div.error_content_grn",
+};
+export const isError = async (page) => {
+  return !!(await page.$(errorSelector.dialog));
+};
 export const isLogin = async (page) => {
   return !(await page.$(loginSelector.dialog));
 };

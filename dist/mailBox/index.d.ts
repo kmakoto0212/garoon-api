@@ -1,9 +1,17 @@
-import { auth } from "../types/auth";
+import { Auth } from "../types/auth";
 import { Browser } from "puppeteer";
-import { mail } from "../types/mail";
+import { Mail } from "../types/mail";
 export declare const getMails: (option: {
   url: string;
-  auth: auth;
+  auth: Auth;
   offset?: number;
   browser?: Browser;
-}) => Promise<mail[]>;
+}) => Promise<Mail[]>;
+export declare const moveMails: (option: {
+  url: string;
+  auth: Auth;
+  moveToCid: string;
+  offset?: number;
+  browser?: Browser;
+  delay?: number;
+}) => Promise<void>;

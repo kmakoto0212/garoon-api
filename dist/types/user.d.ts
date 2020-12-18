@@ -1,4 +1,5 @@
-export declare type user = {
+export declare type User = {
+  url: string;
   about: string | null;
   basicProfile: {
     displayName: string | null;
@@ -17,6 +18,9 @@ export declare type user = {
     employeeID: string | null;
     timeZone: string | null;
     language: string | null;
+  };
+  contacts: {
+    "e-mailAddress": string | null;
   };
   contactDetails?: {
     "e-mailAddress": string | null;

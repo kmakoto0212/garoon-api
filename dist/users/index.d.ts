@@ -1,8 +1,8 @@
-import { auth } from "../types/auth";
-import { user } from "../types/user";
+import { Auth } from "../types/auth";
+import { User } from "../types/user";
 import { Browser } from "puppeteer";
 export declare const getProfile: (option: {
   url: string;
-  auth: auth;
+  auth: Auth;
   browser?: Browser;
-}) => Promise<user>;
+}) => Promise<User>;

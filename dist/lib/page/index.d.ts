@@ -1,12 +1,12 @@
 import { Browser, Page } from "puppeteer";
-import { auth } from "../../types/auth";
+import { Auth } from "../../types/auth";
 export declare const createPage: (
   browser: Browser,
   option?: {
     noImages?: boolean;
     preLogin?: {
       url: string;
-      auth: auth;
+      auth: Auth;
     };
   }
 ) => Promise<Page>;
