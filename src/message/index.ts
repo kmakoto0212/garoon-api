@@ -9,7 +9,7 @@ import {
   createPage,
 } from "../lib/page";
 import { getISOString, getFullUrl } from "../lib/utils";
-import { Browser, Page } from "puppeteer";
+import { Browser, ElementHandle, Page } from "puppeteer";
 
 const sendMailSelector = {
   inputTitle:
@@ -27,43 +27,52 @@ const sendMailSelector = {
 };
 
 const draftMailSelector = {
-  to: "#body > div.mainarea > table > tbody > tr:nth-child(1) > td > span > a",
+  to: "#body > div.mainarea > table > tbody > tr:nth-child(1) > td > span",
 };
 
 const mailPropertySelector = {
   infoTableChild: "#info_area > table > tbody > tr",
+  unread: "#info_area > div.unread_color",
   title: "#message_star_list > h2",
-  from: "#info_area > table > tbody > tr:nth-child(1) > td:nth-child(3) > a",
+  from: "#info_area > table > tbody > tr:nth-child(1) > td:nth-child(3)",
   createdTime: "#info_area > table > tbody > tr:nth-child(1) > td:nth-child(3)",
   noChange: {
-    to:
-      "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3) > span > a",
+    to: "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3) > span",
   },
   change: {
     lastUpdateUser:
       "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3) > a",
     lastUpdateTime:
       "#info_area > table > tbody > tr:nth-child(2) > td:nth-child(3)",
-    to:
-      "#info_area > table > tbody > tr:nth-child(3) > td:nth-child(3) > span > a",
+    to: "#info_area > table > tbody > tr:nth-child(3) > td:nth-child(3) > span",
   },
-  toExtra: "#display_addressee_open > span > a",
+  toExtra: "#display_addressee_open > span",
   CloseButtonImg: "#display_swith_image_close",
-  text: "#info_area > div.bodytext_base_grn > div.margin_all",
+  text: {
+    read: "#info_area > div.bodytext_base_grn > div.margin_all",
+    unread: "#info_area > div.unread_color > div",
+  },
   attachments: "#info_area > div.bodytext_base_grn > p > tt > a",
 };
 
+const getUser = async (elem: ElementHandle<Element>): Promise<User> => {
+  const link = await elem.$("a");
+  if (link) {
+    return {
+      userName: await link.evaluate((x) => x.textContent),
+      userUrl: await link.evaluate((x) => x.getAttribute("href")),
+    };
+  } else {
+    return {
+      userName: await elem.$eval("span", (x) => x.textContent),
+      userUrl: "",
+    };
+  }
+};
+
 const getUsers = async (page: Page, selector: string): Promise<User[]> => {
-  return await page.$$eval(selector, (users) => {
-    return users.map(
-      (user): User => {
-        return {
-          userName: user.textContent,
-          userUrl: user.getAttribute("href"),
-        };
-      }
-    );
-  });
+  const users = await page.$$(selector);
+  return await Promise.all(users.map(async (user) => await getUser(user)));
 };
 
 const getFiles = async (
@@ -176,12 +185,16 @@ export const getMailProperty = async (option: {
 
   const isChange =
     (await page.$$(mailPropertySelector.infoTableChild)).length > 2;
+  const isUnRead = !!(await page.$(mailPropertySelector.unread));
   const _selector = {
     to: isChange
       ? mailPropertySelector.change.to
       : mailPropertySelector.noChange.to,
     lastUpdateUser: mailPropertySelector.change.lastUpdateUser,
     lastUpdateTime: mailPropertySelector.change.lastUpdateTime,
+    text: isUnRead
+      ? mailPropertySelector.text.unread
+      : mailPropertySelector.text.read,
   };
 
   const garoonGetTime = async (selector: string): Promise<string> => {
@@ -191,14 +204,10 @@ export const getMailProperty = async (option: {
       return node.innerHTML.split("&nbsp;")[1];
     }, selector);
   };
-
   const mailProperty: MailProperty = {
     href,
     title: await getNodeToString(page, mailPropertySelector.title),
-    from: {
-      userName: await getNodeToString(page, mailPropertySelector.from),
-      userUrl: await getNodeToHref(page, mailPropertySelector.from),
-    },
+    from: await getUser(await page.$(mailPropertySelector.from)),
     createdTime: await garoonGetTime(
       mailPropertySelector.createdTime
     ).then((x) => getISOString(x)),
@@ -212,7 +221,7 @@ export const getMailProperty = async (option: {
     to: (await getUsers(page, _selector.to)).concat(
       await getUsers(page, mailPropertySelector.toExtra)
     ),
-    text: await getNodeToInnerText(page, mailPropertySelector.text),
+    text: await getNodeToInnerText(page, _selector.text),
     attachments: await getFiles(
       page,
       mailPropertySelector.attachments,
