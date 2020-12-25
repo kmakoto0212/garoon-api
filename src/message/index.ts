@@ -7,6 +7,7 @@ import {
   getNodeToHref,
   getNodeToInnerText,
   createPage,
+  downLoadFile,
 } from "../lib/page";
 import { getISOString, getFullUrl } from "../lib/utils";
 import { Browser, ElementHandle, Page } from "puppeteer";
@@ -160,6 +161,41 @@ export const postMailMessage = async (option: {
   }
 
   return;
+};
+
+export const downLoadMailFiles = async (option: {
+  url: string;
+  auth: Auth;
+  dirName: string;
+  browser?: Browser;
+}): Promise<void> => {
+  const browser: Browser = option.browser || (await createBrowser());
+  const page: Page = await createPage(browser);
+  await page.goto(option.url, {
+    waitUntil: "networkidle2",
+  });
+  await login(page, option.auth);
+
+  const attachments: File[] = await getFiles(
+    page,
+    messagePageSelector.attachments,
+    option.url
+  ).then((files) => {
+    return files.filter(({ fileName }) => {
+      return !/\[.*\]/.test(fileName); //not attachments is ignore.
+    });
+  });
+  await Promise.all(
+    attachments.map(async (file, index) => {
+      await downLoadFile(
+        page,
+        (await page.$$(messagePageSelector.attachments)).filter((node) =>
+          node.evaluate((x) => !/\[.*\]/.test(x.textContent))
+        )[index],
+        option.dirName + "/" + file.fileName
+      );
+    })
+  );
 };
 
 export const getMailProperty = async (option: {

@@ -1,4 +1,6 @@
-import { Browser, Page } from "puppeteer";
+import { Browser, Cookie, Page, Request, ElementHandle } from "puppeteer";
+import { promises as fsp } from "fs";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { login } from "../..";
 import { Auth } from "../../types/auth";
 
@@ -88,4 +90,36 @@ export const getNodeToInnerText = async (
   selector: string
 ): Promise<string> => {
   return await page.$eval(selector, (node) => (node as HTMLElement).innerText);
+};
+
+const sendRequest = async (
+  request: Request,
+  cookies: Cookie[]
+): Promise<AxiosResponse> => {
+  const options: AxiosRequestConfig = {
+    method: request.method(),
+    url: request.url(),
+    data: request.postData(),
+    headers: request.headers(),
+  };
+  options.headers.Cookie = cookies
+    .map((cookie) => cookie.name + "=" + cookie.value)
+    .join(";");
+  return await axios.request(options);
+};
+
+export const downLoadFile = async (
+  page: Page,
+  src: ElementHandle<Element>,
+  saveFileFullPath: string
+): Promise<void> => {
+  console.log(await src.evaluate((x) => x.textContent));
+  const _download = async (request: Request) => {
+    const response = await sendRequest(request, await page.cookies());
+    await fsp.writeFile(saveFileFullPath, response.data);
+  };
+
+  page.on("request", _download);
+  await src.click();
+  await page.waitForTimeout(1000);
 };
