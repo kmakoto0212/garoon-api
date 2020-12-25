@@ -72,7 +72,9 @@ const getUser = async (elem: ElementHandle<Element>): Promise<User> => {
 
 const getUsers = async (page: Page, selector: string): Promise<User[]> => {
   const users = await page.$$(selector);
-  return await Promise.all(users.map(async (user) => await getUser(user)));
+  return (
+    await Promise.all(users.map(async (user) => await getUser(user)))
+  ).filter((user) => !/^javascript:/.test(user.userUrl));
 };
 
 const getFiles = async (
