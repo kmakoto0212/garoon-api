@@ -15,19 +15,21 @@ const sendMailSelector = {
   sendSubmit2: "#mail_button_send > a",
   draftSubmit: "#mail_button_save_top > a",
   uploader: "#file_upload_",
+  uploadFiles: 'input[name="upload_fileids[]"]',
 };
 
 export const sendMail = async (option: {
   url: string;
   auth: Auth;
   browser?: Browser;
-  title: string;
-  body: string;
+  title?: string;
+  body?: string;
   to: string[];
-  CC: string[];
-  BCC: string[];
+  CC?: string[];
+  BCC?: string[];
   isDraft?: boolean;
-  uploadFiles: string[];
+  uploadFiles?: string[];
+  delay?: number;
 }): Promise<void> => {
   const browser: Browser = option.browser || (await createBrowser());
   const page: Page = await createPage(browser);
@@ -46,9 +48,20 @@ export const sendMail = async (option: {
   if (option.uploadFiles) {
     const uploader = await page.$(sendMailSelector.uploader);
     await uploader.uploadFile(...option.uploadFiles);
+    await page.waitForFunction(
+      (selector, filesNum) => {
+        return document.querySelectorAll(selector).length === filesNum;
+      },
+      {
+        polling: "raf",
+        timeout: 0,
+      },
+      sendMailSelector.uploadFiles,
+      option.uploadFiles.length
+    );
   }
 
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(option.delay || 1000);
   if (option.isDraft) {
     await page.click(sendMailSelector.draftSubmit);
   } else {
@@ -57,6 +70,7 @@ export const sendMail = async (option: {
     await page.click(sendMailSelector.sendSubmit2);
   }
 
+  await page.waitForNavigation({ waitUntil: "networkidle2" });
   if (option.browser) {
     await page.close();
   } else {
