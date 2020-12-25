@@ -11,7 +11,7 @@ import {
 import { getISOString, getFullUrl } from "../lib/utils";
 import { Browser, ElementHandle, Page } from "puppeteer";
 
-const sendMailSelector = {
+const sendMessagePageSelector = {
   inputTitle:
     "#body > div.mainarea > form > table > tbody > tr:nth-child(1) > td > input[type=text]",
   inputBody: "#data_editor_id",
@@ -26,11 +26,11 @@ const sendMailSelector = {
   draftSubmit: "#message_button_draft > a",
 };
 
-const draftMailSelector = {
+const draftMessagePageSelector = {
   to: "#body > div.mainarea > table > tbody > tr:nth-child(1) > td > span",
 };
 
-const mailPropertySelector = {
+const messagePageSelector = {
   infoTableChild: "#info_area > table > tbody > tr",
   unread: "#info_area > div.unread_color",
   title: "#message_star_list > h2",
@@ -124,39 +124,39 @@ export const postMailMessage = async (option: {
   });
   await login(page, option.auth);
 
-  await page.type(sendMailSelector.inputTitle, option.title);
-  await page.type(sendMailSelector.inputBody, option.body);
+  await page.type(sendMessagePageSelector.inputTitle, option.title);
+  await page.type(sendMessagePageSelector.inputBody, option.body);
   for (let i = 0; i < option.to.length; i++) {
     await page.evaluate(() => {
       (document.querySelector("#keyword_user") as HTMLInputElement).value = "";
     });
-    const inputUser = await page.$(sendMailSelector.inputUser);
+    const inputUser = await page.$(sendMessagePageSelector.inputUser);
     await inputUser.type(option.to[i]);
     await inputUser.press("Enter");
     await page.waitForTimeout(option.lazy || 1000);
-    await page.$$(sendMailSelector.selectUser).then((e) => {
+    await page.$$(sendMessagePageSelector.selectUser).then((e) => {
       if (e.length) {
         e[0].click();
       } else {
         throw new Error(`${option.to[i]} is notfound...`);
       }
     });
-    await page.click(sendMailSelector.addUserButton);
+    await page.click(sendMessagePageSelector.addUserButton);
   }
 
   if (option.acknowledgment) {
-    await page.click(sendMailSelector.acknowledgment);
+    await page.click(sendMessagePageSelector.acknowledgment);
   }
   if (option.MaintainerAll) {
-    await page.click(sendMailSelector.maintainer);
-    await page.click(sendMailSelector.submitMaintainerAll);
+    await page.click(sendMessagePageSelector.maintainer);
+    await page.click(sendMessagePageSelector.submitMaintainerAll);
   }
 
   await page.waitForTimeout(1000);
   if (option.isDraft) {
-    await page.click(sendMailSelector.draftSubmit);
+    await page.click(sendMessagePageSelector.draftSubmit);
   } else {
-    await page.click(sendMailSelector.sendSubmit);
+    await page.click(sendMessagePageSelector.sendSubmit);
   }
 
   return;
@@ -186,17 +186,17 @@ export const getMailProperty = async (option: {
   const href = page.url();
 
   const isChange =
-    (await page.$$(mailPropertySelector.infoTableChild)).length > 2;
-  const isUnRead = !!(await page.$(mailPropertySelector.unread));
+    (await page.$$(messagePageSelector.infoTableChild)).length > 2;
+  const isUnRead = !!(await page.$(messagePageSelector.unread));
   const _selector = {
     to: isChange
-      ? mailPropertySelector.change.to
-      : mailPropertySelector.noChange.to,
-    lastUpdateUser: mailPropertySelector.change.lastUpdateUser,
-    lastUpdateTime: mailPropertySelector.change.lastUpdateTime,
+      ? messagePageSelector.change.to
+      : messagePageSelector.noChange.to,
+    lastUpdateUser: messagePageSelector.change.lastUpdateUser,
+    lastUpdateTime: messagePageSelector.change.lastUpdateTime,
     text: isUnRead
-      ? mailPropertySelector.text.unread
-      : mailPropertySelector.text.read,
+      ? messagePageSelector.text.unread
+      : messagePageSelector.text.read,
   };
 
   const garoonGetTime = async (selector: string): Promise<string> => {
@@ -208,10 +208,10 @@ export const getMailProperty = async (option: {
   };
   const mailProperty: MailProperty = {
     href,
-    title: await getNodeToString(page, mailPropertySelector.title),
-    from: await getUser(await page.$(mailPropertySelector.from)),
+    title: await getNodeToString(page, messagePageSelector.title),
+    from: await getUser(await page.$(messagePageSelector.from)),
     createdTime: await garoonGetTime(
-      mailPropertySelector.createdTime
+      messagePageSelector.createdTime
     ).then((x) => getISOString(x)),
     UpdateUser: {
       userName: await getNodeToString(page, _selector.lastUpdateUser),
@@ -221,12 +221,12 @@ export const getMailProperty = async (option: {
       getISOString(x)
     ),
     to: (await getUsers(page, _selector.to)).concat(
-      await getUsers(page, mailPropertySelector.toExtra)
+      await getUsers(page, messagePageSelector.toExtra)
     ),
     text: await getNodeToInnerText(page, _selector.text),
     attachments: await getFiles(
       page,
-      mailPropertySelector.attachments,
+      messagePageSelector.attachments,
       option.url
     ).then((files) => {
       return files.filter(({ fileName }) => {
@@ -258,7 +258,7 @@ export const getDraftMailProperty = async (option: {
 
   const mailProperty: Partial<MailProperty> = {
     href,
-    to: await getUsers(page, draftMailSelector.to),
+    to: await getUsers(page, draftMessagePageSelector.to),
   };
 
   return mailProperty;

@@ -3,7 +3,8 @@ import { createPage } from "../lib/page";
 import { login } from "..";
 import { Auth } from "../types/auth";
 import { Browser, Page } from "puppeteer";
-const sendMailSelector = {
+
+const sendMailPageSelector = {
   inputTitle: "#subject_mail",
   inputBody: "#data_editor_id",
   inputTo: "#selectTo_annoninput > input",
@@ -38,15 +39,15 @@ export const sendMail = async (option: {
   });
   await login(page, option.auth);
 
-  await page.type(sendMailSelector.inputTitle, option.title);
-  await page.type(sendMailSelector.inputTo, option.to.join(","));
-  await page.type(sendMailSelector.inputCC, option.CC.join(","));
-  await page.click(sendMailSelector.openBCC);
-  await page.type(sendMailSelector.inputBCC, option.BCC.join(","));
-  await page.type(sendMailSelector.inputBody, option.body);
+  await page.type(sendMailPageSelector.inputTitle, option.title);
+  await page.type(sendMailPageSelector.inputTo, option.to.join(","));
+  await page.type(sendMailPageSelector.inputCC, option.CC.join(","));
+  await page.click(sendMailPageSelector.openBCC);
+  await page.type(sendMailPageSelector.inputBCC, option.BCC.join(","));
+  await page.type(sendMailPageSelector.inputBody, option.body);
 
   if (option.uploadFiles) {
-    const uploader = await page.$(sendMailSelector.uploader);
+    const uploader = await page.$(sendMailPageSelector.uploader);
     await uploader.uploadFile(...option.uploadFiles);
     await page.waitForFunction(
       (selector, filesNum) => {
@@ -56,18 +57,18 @@ export const sendMail = async (option: {
         polling: "raf",
         timeout: 0,
       },
-      sendMailSelector.uploadFiles,
+      sendMailPageSelector.uploadFiles,
       option.uploadFiles.length
     );
   }
 
   await page.waitForTimeout(option.delay || 1000);
   if (option.isDraft) {
-    await page.click(sendMailSelector.draftSubmit);
+    await page.click(sendMailPageSelector.draftSubmit);
   } else {
-    await page.click(sendMailSelector.sendSubmit);
+    await page.click(sendMailPageSelector.sendSubmit);
     await page.waitForNavigation({ waitUntil: "networkidle2" });
-    await page.click(sendMailSelector.sendSubmit2);
+    await page.click(sendMailPageSelector.sendSubmit2);
   }
 
   await page.waitForNavigation({ waitUntil: "networkidle2" });

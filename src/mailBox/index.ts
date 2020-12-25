@@ -6,7 +6,7 @@ import { Browser } from "puppeteer";
 import { Mail } from "../types/mail";
 import { getFullUrl } from "../lib/utils";
 
-const selector = {
+const mailBoxPageSelector = {
   mailList: "td > span > a",
   mailBox: "#message_list > tbody > tr",
   moveTo: "#dcid1",
@@ -32,7 +32,7 @@ export const getMails = async (option: {
   });
   page.waitForTimeout(1000);
   if (!option.browser) await login(page, option.auth);
-  const mailsNode = await page.$$(selector.mailList);
+  const mailsNode = await page.$$(mailBoxPageSelector.mailList);
   let mails = (
     await Promise.all(
       mailsNode.map(async (mail) => {
@@ -81,10 +81,10 @@ export const moveMails = async (option: {
   });
   if (!option.browser) await login(page, option.auth);
 
-  while ((await page.$$(selector.mailBox)).length > 1) {
-    await page.click(selector.allMailsCheckButton);
-    await page.select(selector.moveTo, option.moveToCid);
-    await page.click(selector.moveSubmit);
+  while ((await page.$$(mailBoxPageSelector.mailBox)).length > 1) {
+    await page.click(mailBoxPageSelector.allMailsCheckButton);
+    await page.select(mailBoxPageSelector.moveTo, option.moveToCid);
+    await page.click(mailBoxPageSelector.moveSubmit);
     await page.waitForTimeout(option.delay || 1000);
   }
 
