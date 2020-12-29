@@ -2,6 +2,7 @@ import { createBrowser } from "../lib/browser";
 import { createPage } from "../lib/page";
 import { login } from "..";
 import { Auth } from "../types/auth";
+import { Address } from "../types/mail";
 import { Browser, Page } from "puppeteer";
 
 const sendMailPageSelector = {
@@ -19,15 +20,20 @@ const sendMailPageSelector = {
   uploadFiles: 'input[name="upload_fileids[]"]',
 };
 
+const toAddress = (address: Address): string => {
+  if (!address.name) return address.address;
+  return `"${address.name}" <${address.address}>`;
+};
+
 export const sendMail = async (option: {
   url: string;
   auth: Auth;
   browser?: Browser;
   title?: string;
   body?: string;
-  to: string[];
-  CC?: string[];
-  BCC?: string[];
+  to: Address[];
+  CC?: Address[];
+  BCC?: Address[];
   isDraft?: boolean;
   uploadFiles?: string[];
   delay?: number;
@@ -40,11 +46,26 @@ export const sendMail = async (option: {
   await login(page, option.auth);
 
   await page.type(sendMailPageSelector.inputTitle, option.title);
-  await page.type(sendMailPageSelector.inputTo, option.to.join(","));
-  await page.type(sendMailPageSelector.inputCC, option.CC.join(","));
-  await page.click(sendMailPageSelector.openBCC);
-  await page.type(sendMailPageSelector.inputBCC, option.BCC.join(","));
-  await page.type(sendMailPageSelector.inputBody, option.body);
+  await page.type(
+    sendMailPageSelector.inputTo,
+    option.to.map(toAddress).join(",")
+  );
+  if (option.CC) {
+    await page.type(
+      sendMailPageSelector.inputCC,
+      option.CC.map(toAddress).join(",")
+    );
+  }
+  if (option.BCC) {
+    await page.click(sendMailPageSelector.openBCC);
+    await page.type(
+      sendMailPageSelector.inputBCC,
+      option.BCC.map(toAddress).join(",")
+    );
+  }
+  if (option.body) {
+    await page.type(sendMailPageSelector.inputBody, option.body);
+  }
 
   if (option.uploadFiles) {
     const uploader = await page.$(sendMailPageSelector.uploader);

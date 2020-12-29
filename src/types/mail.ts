@@ -13,6 +13,11 @@ export type File = {
   fileUrl: string;
 };
 
+export type Address = {
+  name: string;
+  address: string;
+};
+
 export type MailProperty = {
   href: string;
   title: string;
