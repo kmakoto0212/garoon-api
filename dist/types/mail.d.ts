@@ -10,6 +10,10 @@ export declare type File = {
   fileName: string;
   fileUrl: string;
 };
+export declare type Address = {
+  name: string;
+  address: string;
+};
 export declare type MailProperty = {
   href: string;
   title: string;

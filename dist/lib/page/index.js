@@ -1,3 +1,5 @@
+import { promises as fsp } from "fs";
+import axios from "axios";
 import { login } from "../..";
 export const createPage = async (browser, option) => {
   var _a;
@@ -63,4 +65,26 @@ export const getNodesToHrefArray = async (page, selector) => {
 };
 export const getNodeToInnerText = async (page, selector) => {
   return await page.$eval(selector, (node) => node.innerText);
+};
+const sendRequest = async (request, cookies) => {
+  const options = {
+    method: request.method(),
+    url: request.url(),
+    data: request.postData(),
+    headers: request.headers(),
+  };
+  options.headers.Cookie = cookies
+    .map((cookie) => cookie.name + "=" + cookie.value)
+    .join(";");
+  return await axios.request(options);
+};
+export const downLoadFile = async (page, src, saveFileFullPath) => {
+  console.log(await src.evaluate((x) => x.textContent));
+  const _download = async (request) => {
+    const response = await sendRequest(request, await page.cookies());
+    await fsp.writeFile(saveFileFullPath, response.data);
+  };
+  page.on("request", _download);
+  await src.click();
+  await page.waitForTimeout(1000);
 };

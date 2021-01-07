@@ -1,4 +1,4 @@
-import { Browser, Page } from "puppeteer";
+import { Browser, Page, ElementHandle } from "puppeteer";
 import { Auth } from "../../types/auth";
 export declare const createPage: (
   browser: Browser,
@@ -30,3 +30,8 @@ export declare const getNodeToInnerText: (
   page: Page,
   selector: string
 ) => Promise<string>;
+export declare const downLoadFile: (
+  page: Page,
+  src: ElementHandle<Element>,
+  saveFileFullPath: string
+) => Promise<void>;

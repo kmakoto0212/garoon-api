@@ -5,7 +5,7 @@ import {
   createPage,
 } from "../lib/page";
 import { login } from "..";
-const selector = {
+const userPageSelector = {
   about:
     "#js-settings-content > div.b-settings-profile-comment > div > div.b-form-form.b-form-edittoggleform.is-readonly > div.is-readonly > div > div > span > span",
   basicProfile: {
@@ -53,50 +53,65 @@ export const getProfile = async (option) => {
   const url = page.url();
   const profile = {
     url: url,
-    about: await getNodeToString(page, selector.about),
+    about: await getNodeToString(page, userPageSelector.about),
     basicProfile: {
       displayName: await getNodeToString(
         page,
-        selector.basicProfile.displayName
+        userPageSelector.basicProfile.displayName
       ),
       name: {
         surName: await getNodeToString(
           page,
-          selector.basicProfile.name.surName
+          userPageSelector.basicProfile.name.surName
         ),
         givenName: await getNodeToString(
           page,
-          selector.basicProfile.name.givenName
+          userPageSelector.basicProfile.name.givenName
         ),
       },
       yomigana: {
         surNameReading: await getNodeToString(
           page,
-          selector.basicProfile.yomigana.surNameReading
+          userPageSelector.basicProfile.yomigana.surNameReading
         ),
         givenNameReading: await getNodeToString(
           page,
-          selector.basicProfile.yomigana.givenNameReading
+          userPageSelector.basicProfile.yomigana.givenNameReading
         ),
       },
       departments: await getNodesToStringsArray(
         page,
-        selector.basicProfile.departments
+        userPageSelector.basicProfile.departments
       ),
       priorityDepartment: await getNodeToString(
         page,
-        selector.basicProfile.priorityDepartment
+        userPageSelector.basicProfile.priorityDepartment
       ),
-      birthday: await getNodeToString(page, selector.basicProfile.birthday),
-      hireDate: await getNodeToString(page, selector.basicProfile.hireDate),
-      employeeID: await getNodeToString(page, selector.basicProfile.employeeID),
-      timeZone: await getNodeToString(page, selector.basicProfile.timeZone),
-      language: await getNodeToString(page, selector.basicProfile.language),
+      birthday: await getNodeToString(
+        page,
+        userPageSelector.basicProfile.birthday
+      ),
+      hireDate: await getNodeToString(
+        page,
+        userPageSelector.basicProfile.hireDate
+      ),
+      employeeID: await getNodeToString(
+        page,
+        userPageSelector.basicProfile.employeeID
+      ),
+      timeZone: await getNodeToString(
+        page,
+        userPageSelector.basicProfile.timeZone
+      ),
+      language: await getNodeToString(
+        page,
+        userPageSelector.basicProfile.language
+      ),
     },
     contacts: {
       "e-mailAddress": await getNodeToString(
         page,
-        selector.contacts["e-mailAddress"]
+        userPageSelector.contacts["e-mailAddress"]
       ),
     },
   };

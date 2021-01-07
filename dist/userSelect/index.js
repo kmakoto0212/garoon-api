@@ -20,10 +20,6 @@ export const getUsersValues = async (option) => {
       });
     })
   );
-  await page.screenshot({
-    path: "./screenshot.png",
-    fullPage: true,
-  });
   browser.close();
   return users;
 };
