@@ -2,13 +2,14 @@ import { createBrowser } from "../lib/browser";
 import { login } from "..";
 import { Auth } from "../types/auth";
 import { URL } from "url";
-import { Browser } from "puppeteer";
+import { Browser, Page } from "puppeteer";
 import { Mail } from "../types/mail";
 import { getFullUrl } from "../lib/utils";
+import { createPage } from "../lib/page";
 
 const mailBoxPageSelector = {
   mailList: "td > span > a",
-  mailBox: "#message_list > tbody > tr",
+  mail: "#message_list > tbody > tr",
   moveTo: "#dcid1",
   allMailsCheckButton:
     "#view_part > div:nth-child(3) > span:nth-child(1) > button",
@@ -23,7 +24,7 @@ export const getMails = async (option: {
 }): Promise<Mail[]> => {
   option.offset ??= 0;
   const browser = option.browser || (await createBrowser());
-  const [page] = await browser.pages();
+  const page: Page = await createPage(browser);
   const _url = new URL(option.url);
   _url.searchParams.append("sp", option.offset.toString());
 
@@ -60,7 +61,11 @@ export const getMails = async (option: {
     option.offset = option.offset + 30;
     mails = mails.concat(await getMails(option));
   }
-  browser.close();
+  if (option.browser) {
+    await page.close();
+  } else {
+    await browser.close();
+  }
 
   return mails;
 };
@@ -74,21 +79,25 @@ export const moveMails = async (option: {
   delay?: number;
 }): Promise<void> => {
   const browser = option.browser || (await createBrowser({}));
-  const [page] = await browser.pages();
+  const page: Page = await createPage(browser);
 
   await page.goto(option.url, {
     waitUntil: "networkidle0",
   });
-  if (!option.browser) await login(page, option.auth);
+  await login(page, option.auth);
 
-  while ((await page.$$(mailBoxPageSelector.mailBox)).length > 1) {
+  while ((await page.$$(mailBoxPageSelector.mail)).length > 1) {
     await page.click(mailBoxPageSelector.allMailsCheckButton);
     await page.select(mailBoxPageSelector.moveTo, option.moveToCid);
     await page.click(mailBoxPageSelector.moveSubmit);
     await page.waitForTimeout(option.delay || 1000);
   }
 
-  await browser.close();
+  if (option.browser) {
+    await page.close();
+  } else {
+    await browser.close();
+  }
 
   return;
 };
