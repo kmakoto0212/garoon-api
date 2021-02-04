@@ -1,5 +1,5 @@
 import { createBrowser } from "../src/lib/Browser";
-import { login } from "../src/garoon";
+import { login } from "../src";
 
 (async () => {
   const auth = {
